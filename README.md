@@ -158,8 +158,30 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 ### Passo 04: Criar um Load Balancer (NLB)
 
 - EC2 > Load Balancing > Load balancers > Create load balancer
+  - Load balancer types: **Network Load Balancer** > Create
+  - Name: **nlb-mdc**
+  - Scheme: **Internet-facing**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Mappings (AZs / Subnets):
+    - az1: [**pubSubnetA**]
+    - az2: [**pubSubnetB**]
+  - Security Groups: [**sgELB**]
+  - Listeners **TCP:80** > Create target group:
+    - Target type: **Instances**
+    - Name: **tg-nlb-mdc**
+    - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+    - Health checks > Advanced health check settings: **Timeout: 2**; **Interval: 5**
+    - **Next**
+    - Available instances: [**WebServer1**] ; [**WebServer2**] > **Include as pending below**
+    - **Create target group**
+  - Forward to: selecionar Target group criada [**tg-nlb-mdc**]
+  - **Create load balancer**
 
 ### Passo 05: Validar Load Balancer
+
+- Aguardar o provisionamento e inicialização do Load Balancer
+- Aguardar que o Target group registre as instâncias EC2 e atinja o estado "healthy"
+- Copiar o "**DNS name**" do Loab Balancer e testar no web browser
 
 ## Aplication Load Balancer (ALB) com Auto Scaling Group (ASG)
 

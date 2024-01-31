@@ -47,7 +47,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 
 **Public Route Table:**
 
-- VPC -> Route Tables -> Create route table
+- VPC > Route Tables > Create route table
   - Name: **rt-public**
   - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
   - **Create**
@@ -59,7 +59,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 
 **Private Route Table:**
 
-- VPC -> Route Tables -> Create route table
+- VPC > Route Tables > Create route table
   - Name: **rt-private**
   - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
   - **Create**
@@ -67,15 +67,63 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
   - Route Tables > [**rt-private**] > Subnet associations > Edit subnet associations:
     - selecione as Subnets privadas: [**privSubnetA**]; [**privSubnetB**]
 
+**VPC Resource Map:**
+
+![vpc-resource-map](./img/vpc-resource-map.png)
+
 ## Elastic Load Balancer (NLB): implantação com 2 instâncias em alta disponibilidade
 
 **Desenho da Arquitetura**:
 
 ![NLB-diagram](./img/Diagram-NLB.png)
 
-### Passo 01: Criar Key Pairs
+### Passo 01: Criar uma Key Pair
+
+- EC2 > Network & Security > Key Pairs > Create key pair
+  - Name: **keypair**
+  - Key pair type: **RSA**
+  - Private key file format: **.pem**
+  - **Create**
 
 ### Passo 02: Criar Security Groups
+
+- EC2 > Network & Security > Security Groups > Create security group
+  - Name: **sgELB**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Inbound Rules > Add Rule:
+
+    | Type | Source | Description |
+    | --- | --- | --- |
+    | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
+    | HTTPS (443) | Anywhere-IPv4 | Allow HTTPS |
+  
+  - **Create**
+
+- EC2 > Network & Security > Security Groups > Create security group
+  - Name: **sgASG**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Inbound Rules > Add Rule:
+
+    | Type | Source | Description |
+    | --- | --- | --- |
+    | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
+    | HTTPS (443) | Anywhere-IPv4 | Allow HTTPS |
+    | All traffic | Custom: [sgELB] | Allow Load Balancer |
+
+  - **Create**
+
+- EC2 > Network & Security > Security Groups > Create security group
+  - Name: **sgWebServer**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Inbound Rules > Add Rule:
+
+    | Type | Source | Description |
+    | --- | --- | --- |
+    | SSH (22) | Anywhere-IPv4 | Allow SSH |
+    | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
+    | All traffic | Custom: [sgELB] | Allow Load Balancer |
+
+  - **Create**
 
 ### Passo 03: Criar instâncias EC2 (Elastic Compute Cloud)
 

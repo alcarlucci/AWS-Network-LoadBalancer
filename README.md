@@ -125,9 +125,39 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 
   - **Create**
 
-### Passo 03: Criar instâncias EC2 (Elastic Compute Cloud)
+### Passo 03: Criar duas instâncias EC2 (Elastic Compute Cloud)
+
+- EC2 > Instances > Instances > Launch instances
+  - Name: **WebServer1**; repertir passos para **WebServer2**
+  - Amazon Machine Image (AMI): **Amazon Linux**
+  - Instance type: **t2.micro**
+  - Key pair: **keypair**
+  - Network settings > Edit:
+    - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+    - Subnet: WebServer1 [**pubSubnetA**]; WebServer2 [**pubSubnetB**]
+    - Select existing security group > Security Groups: [**sgWebServer**]
+  - Advanced details > UserData:
+
+    ```bash
+    #!/bin/bash
+    yum update -y
+    yum install -y httpd
+    systemctl start httpd
+    systemctl enable httpd
+    echo "<h1>Hello World from Load Balancer $(hostname -f)</h1>" > /var/www/html/index.html
+    ```
+
+  - **Launch instance**
+
+- para testar a conexão na Instância pública via SSH, usar o comando:
+
+    ```bash
+    ssh -i [nomekeypair.pem] ec2-user@[PublicIP]
+    ```
 
 ### Passo 04: Criar um Load Balancer (NLB)
+
+- EC2 > Load Balancing > Load balancers > Create load balancer
 
 ### Passo 05: Validar Load Balancer
 
@@ -142,3 +172,9 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 ### Passo 02: Criar um Aplication Load Balancer (ALB)
 
 ### Passo 03: Criar um Auto Scaling Group (ASG)
+
+##
+
+Bons estudos!!!
+
+**André Carlucci**

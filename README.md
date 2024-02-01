@@ -161,7 +161,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
     - **Next**
     - Available instances: [**WebServer1**] ; [**WebServer2**] > **Include as pending below**
     - **Create target group**
-  - Forward to: selecionar Target group criada [**tg-nlb-mdc**]
+  - Forward to: selecionar o Target group criado [**tg-nlb-mdc**]
   - **Create load balancer**
 
 ### Passo 05: Validar Network Load Balancer
@@ -201,7 +201,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
   - Mappings (AZs / Subnets):
     - az1: [**pubSubnetA**]
     - az2: [**pubSubnetB**]
-  - Security Groups: [**sgASG**]
+  - Security Groups: [**sgELB**]
   - Listeners **HTTP:80** > Create target group:
     - Target type: **Instances**
     - Name: **tg-alb-mdc**
@@ -210,7 +210,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
     - **Next**
     - Available instances: não selecionar as instâncias - deixar vazio
     - **Create target group**
-  - Forward to: selecionar Target group criada [**tg-alb-mdc**]
+  - Forward to: selecionar o Target group criado [**tg-alb-mdc**]
   - **Create load balancer**
 
 ### Passo 03: Criar um Auto Scaling Group (ASG)
@@ -223,7 +223,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
     - Amazon Machine Image (AMI) > Quick Start: **Amazon Linux**
     - Instance type: **t2.micro**
     - Key pair: **keypair**
-    - Network settings > Edit:
+    - Network settings:
       - Subnet: **Don't include in launch template**
       - Select existing security group > Security Groups: [**sgASG**]
     - Advanced details > UserData:
@@ -261,6 +261,9 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 - Aguardar o provisionamento e inicialização do Application Load Balancer
 - Aguardar que o ASG inicialize e o Target group registre as instâncias EC2 e atinja o estado "healthy"
 - Copiar o "**DNS name**" do Application Loab Balancer e testar no web browser
+
+![alb-10-0-01](./img/alb-10-0-01.png)
+![alb-10-0-11](./img/alb-10-0-11.png)
 
 ## AWS Resource Groups
 

@@ -100,19 +100,6 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
   - **Create**
 
 - EC2 > Network & Security > Security Groups > Create security group
-  - Name: **sgASG**
-  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
-  - Inbound Rules > Add Rule:
-
-    | Type | Source | Description |
-    | --- | --- | --- |
-    | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
-    | HTTPS (443) | Anywhere-IPv4 | Allow HTTPS |
-    | All traffic | Custom: [sgELB] | Allow Load Balancer |
-
-  - **Create**
-
-- EC2 > Network & Security > Security Groups > Create security group
   - Name: **sgWebServer**
   - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
   - Inbound Rules > Add Rule:
@@ -121,7 +108,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
     | --- | --- | --- |
     | SSH (22) | Anywhere-IPv4 | Allow SSH |
     | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
-    | All traffic | Custom: [sgELB] | Allow Load Balancer |
+    | All TCP | Custom: [sgELB] | Allow Load Balancer |
 
   - **Create**
 
@@ -177,7 +164,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
   - Forward to: selecionar Target group criada [**tg-nlb-mdc**]
   - **Create load balancer**
 
-### Passo 05: Validar Load Balancer
+### Passo 05: Validar Network Load Balancer
 
 - Aguardar o provisionamento e inicialização do Load Balancer
 - Aguardar que o Target group registre as instâncias EC2 e atinja o estado "healthy"
@@ -191,9 +178,95 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 
 ### Passo 01: Criar Security Groups
 
+- EC2 > Network & Security > Security Groups > Create security group
+  - Name: **sgASG**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Inbound Rules > Add Rule:
+
+    | Type | Source | Description |
+    | --- | --- | --- |
+    | HTTP (80) | Anywhere-IPv4 | Allow HTTP |
+    | HTTPS (443) | Anywhere-IPv4 | Allow HTTPS |
+    | All TCP | Custom: [sgELB] | Allow Load Balancer |
+
+  - **Create**
+
 ### Passo 02: Criar um Aplication Load Balancer (ALB)
 
+- EC2 > Load Balancing > Load balancers > Create load balancer
+  - Load balancer types: **Application Load Balancer** > Create
+  - Name: **alb-mdc**
+  - Scheme: **Internet-facing**
+  - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+  - Mappings (AZs / Subnets):
+    - az1: [**pubSubnetA**]
+    - az2: [**pubSubnetB**]
+  - Security Groups: [**sgASG**]
+  - Listeners **HTTP:80** > Create target group:
+    - Target type: **Instances**
+    - Name: **tg-alb-mdc**
+    - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+    - Health checks > Advanced health check settings: **Timeout: 2**; **Interval: 5**
+    - **Next**
+    - Available instances: não selecionar as instâncias - deixar vazio
+    - **Create target group**
+  - Forward to: selecionar Target group criada [**tg-alb-mdc**]
+  - **Create load balancer**
+
 ### Passo 03: Criar um Auto Scaling Group (ASG)
+
+- EC2 > Auto Scaling > Auto Scaling Groups > Create Auto Scaling group
+  - Name: **asg-mdc**
+  - Launch template > Create a launch template:
+    - Template name: **template-asg-mdc**
+    - Template version description: **First template**
+    - Amazon Machine Image (AMI) > Quick Start: **Amazon Linux**
+    - Instance type: **t2.micro**
+    - Key pair: **keypair**
+    - Network settings > Edit:
+      - Subnet: **Don't include in launch template**
+      - Select existing security group > Security Groups: [**sgASG**]
+    - Advanced details > UserData:
+
+      ```bash
+      #!/bin/bash
+      yum update -y
+      yum install -y httpd
+      systemctl start httpd
+      systemctl enable httpd
+      echo "<h1>Hello World from Application Load Balancer $(hostname -f)</h1>" > /var/www/html/index.html
+      ```
+
+    - **Create Launch template**
+  - Launch template: selecionar Launch template criado [**template-asg-mdc**]
+  - **Next**
+  - Network:
+    - VPC: selecionar a VPC criada anteriormente [**vpcMDC**]
+    - AZs and subnets: [**pubSubnetA**]; [**pubSubnetB**]
+  - **Next**
+  - Load balancing: **Attach to an existing load balancer**
+  - Choose from your load balancer target groups > target groups: [**tg-alb-mdc**]
+  - **Next**
+  - Group size / Scaling:
+    - Desired capacity: 2
+    - Min desired capacity: 2
+    - Max desired capacity: 4
+  - **Next**
+  - **Next**
+  - **Next**
+  - **Create Auto Scaling group**
+
+### Passo 04: Validar Application Load Balancer
+
+- Aguardar o provisionamento e inicialização do Application Load Balancer
+- Aguardar que o ASG inicialize e o Target group registre as instâncias EC2 e atinja o estado "healthy"
+- Copiar o "**DNS name**" do Application Loab Balancer e testar no web browser
+
+## AWS Resource Groups
+
+**Recursos criados ao final do Laboratório:**
+
+![resource-group](./img/resource-group.png)
 
 ##
 

@@ -67,7 +67,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
   - Route Tables > [**rt-private**] > Subnet associations > Edit subnet associations:
     - selecione as Subnets privadas: [**privSubnetA**]; [**privSubnetB**]
 
-**VPC Resource Map:**
+### VPC Resource Map
 
 ![vpc-resource-map](./img/vpc-resource-map.png)
 
@@ -263,6 +263,7 @@ Quatro Subnets serão criadas: 2 públicas e 2 privadas
 - Copiar o "**DNS name**" do Application Loab Balancer e testar no web browser
 
 ![alb-10-0-01](./img/alb-10-0-01.png)
+
 ![alb-10-0-11](./img/alb-10-0-11.png)
 
 ## AWS Resource Groups
